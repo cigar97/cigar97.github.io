@@ -1,0 +1,301 @@
+<!DOCTYPE html>
+<html lang="zh-Hant">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>保險業務數位工具箱｜投資型保單進階版</title>
+    <style>
+        :root {
+            --allianz-blue: #003781;
+            --chubb-orange: #ff9d00;
+            --yuanta-gold: #b2945e;
+            --kgi-orange: #f37021;
+            --bnp-green: #00965e;
+            --bg-light: #f4f7f9;
+        }
+        body { font-family: -apple-system, "Noto Sans TC", sans-serif; background-color: var(--bg-light); margin: 0; padding: 20px; color: #333; }
+        .container { max-width: 800px; margin: auto; }
+        
+        /* Header */
+        .header { background: white; padding: 30px; border-radius: 24px; text-align: center; margin-bottom: 25px; box-shadow: 0 10px 30px rgba(0,0,0,0.05); }
+        .header h2 { margin: 0; font-size: 1.6rem; color: #1a1a1a; letter-spacing: 1px; }
+        .header p { margin: 10px 0 0; color: #666; font-size: 0.9rem; }
+
+        /* Search */
+        .search-box { width: 100%; padding: 15px 25px; border: none; border-radius: 30px; font-size: 1rem; box-shadow: 0 4px 12px rgba(0,0,0,0.08); margin-bottom: 25px; box-sizing: border-box; outline: none; }
+
+        /* Card Styles */
+        .card { background: white; border-radius: 20px; margin-bottom: 20px; transition: all 0.3s cubic-bezier(0.25, 0.8, 0.25, 1); border-left: 10px solid #ccc; overflow: hidden; position: relative; }
+        .card:hover { transform: translateY(-4px); box-shadow: 0 12px 25px rgba(0,0,0,0.1); }
+        
+        .card.allianz { border-left-color: var(--allianz-blue); }
+        .card.chubb { border-left-color: var(--chubb-orange); }
+        .card.yuanta { border-left-color: var(--yuanta-gold); }
+        .card.kgi { border-left-color: var(--kgi-orange); }
+        .card.bnp { border-left-color: var(--bnp-green); }
+
+        .card-header { padding: 25px; display: flex; justify-content: space-between; align-items: center; cursor: pointer; }
+        .company-info .name { font-size: 1.2rem; font-weight: 800; display: block; margin-bottom: 4px; }
+        .company-info .product { font-size: 0.85rem; color: #888; }
+        
+        .badges { display: flex; flex-direction: column; align-items: flex-end; gap: 6px; }
+        .badge { padding: 5px 12px; border-radius: 8px; font-size: 0.8rem; font-weight: bold; background: #f1f3f5; }
+        .badge-main { background: #eef6ff; color: #0056b3; border: 1px solid #d0e3ff; }
+
+        .card-content { display: none; padding: 0 25px 20px; border-top: 1px solid #f8f9fa; background: #fafafa; }
+        .card.active .card-content { display: block; }
+
+        .info-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 20px; margin-top: 20px; margin-bottom: 20px; }
+        .info-box h4 { margin: 0 0 8px; color: #adb5bd; font-size: 0.75rem; text-transform: uppercase; letter-spacing: 1.2px; }
+        .info-box p { margin: 0; font-size: 0.95rem; font-weight: 500; line-height: 1.6; }
+        .hl-time { color: #2d3436; font-weight: 700; border-bottom: 2px solid #ffd43b; }
+
+        .action-area { display: flex; justify-content: flex-end; padding-bottom: 10px; }
+        .more-btn { padding: 10px 18px; background: #333; color: white; border-radius: 30px; font-size: 0.8rem; font-weight: 600; cursor: pointer; border: none; transition: 0.2s; }
+        .more-btn:hover { background: #555; transform: scale(1.05); }
+
+        /* Modal & Timeline */
+        .modal { display: none; position: fixed; z-index: 1000; left: 0; top: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.6); backdrop-filter: blur(4px); align-items: center; justify-content: center; }
+        .modal-content { background: white; padding: 30px; border-radius: 24px; width: 90%; max-width: 600px; max-height: 90vh; overflow-y: auto; box-shadow: 0 20px 50px rgba(0,0,0,0.3); animation: slideUp 0.3s ease; }
+        .modal-header { display: flex; justify-content: space-between; align-items: center; border-bottom: 1px solid #eee; padding-bottom: 15px; margin-bottom: 20px; }
+        .modal-body p { margin: 12px 0; font-size: 0.95rem; display: flex; justify-content: space-between; border-bottom: 1px dashed #f0f0f0; padding-bottom: 8px; }
+        .close { font-size: 24px; cursor: pointer; color: #ccc; }
+
+	.modal-body p { margin: 12px 0; font-size: 0.95rem; display: flex; justify-content: space-between; border-bottom: 1px dashed #f0f0f0; padding-bottom: 8px; }
+        .modal-label { color: #666; }
+        .modal-value { font-weight: 700; color: #333; text-align: right; }
+        .timing-box { background: #fffde7; padding: 12px; border-radius: 12px; margin: 15px 0; border-left: 5px solid #fbc02d; font-size: 0.9rem; }
+
+        .timeline-container { margin: 30px 0 10px; padding: 25px 10px; background: #f8f9fa; border-radius: 20px; }
+        .timeline-title { font-size: 0.9rem; font-weight: bold; margin-bottom: 25px; color: #444; display: block; text-align: center; }
+        .timeline { display: flex; justify-content: space-between; position: relative; }
+        .timeline::before { content: ''; position: absolute; top: 15px; left: 20px; right: 20px; height: 3px; background: #dee2e6; z-index: 1; }
+        
+        .step { position: relative; z-index: 2; display: flex; flex-direction: column; align-items: center; flex: 1; }
+        .dot { width: 30px; height: 30px; background: white; border: 3px solid #dee2e6; border-radius: 50%; margin-bottom: 10px; display: flex; align-items: center; justify-content: center; font-size: 0.7rem; font-weight: bold; color: #adb5bd; }
+        .step.active .dot { border-color: var(--current-color); color: var(--current-color); box-shadow: 0 0 10px rgba(0,0,0,0.1); }
+        .step.finish .dot { background: var(--current-color); border-color: var(--current-color); color: white; }
+        .step-label { font-size: 0.75rem; font-weight: bold; color: #495057; }
+        .step-desc { font-size: 0.7rem; color: #868e96; margin-top: 5px; text-align: center; line-height: 1.3; }
+        .deadline-tag { color: #e74c3c; font-weight: bold; font-size: 0.6rem; }
+
+        @keyframes slideUp { from { transform: translateY(30px); opacity: 0; } to { transform: translateY(0); opacity: 1; } }
+        .footer { text-align: center; margin: 40px 0; font-size: 0.8rem; color: #adb5bd; }
+    </style>
+</head>
+<body>
+
+<div class="container">
+    <div class="header">
+        <h3>投資型保單借還款查詢工具</h3>
+        <p>內部業務專屬資訊</p>
+    </div>
+
+    <input type="text" id="searchInput" class="search-box" placeholder="搜尋公司、產品或借款關鍵字..." onkeyup="filterCards()">
+
+    <div class="card allianz" data-title="安聯人壽 吉利發發 50% 3.99">
+        <div class="card-header" onclick="toggleCard(this)">
+            <div class="company-info"><span class="name" style="color: var(--allianz-blue);">安聯人壽</span><span class="product">吉利發發變額萬能壽險</span></div>
+            <div class="badges"><span class="badge badge-main">最高借款 50%</span><span class="badge">利率 3.99%</span></div>
+        </div>
+        <div class="card-content">
+            <div class="info-grid">
+                <div class="info-box"><h4>資金到帳時效</h4><p class="hl-time">約 1-3 工作日</p></div>
+                <div class="info-box"><h4>標的轉換價格適用</h4><p>轉出：T+1<br>轉入：T+2(國內)/T+n(國外)</p></div>
+                <div class="info-box"><h4>借款申請路徑</h4><p>APP 線上申請 或 紙本郵寄送件</p></div>
+                <div class="info-box"><h4>還款帳號查詢</h4><p>登入「安聯 e 服務」> 保單管理 > 借還款 > 顯示「專屬虛擬帳號」</p></div>
+            </div>
+            <div class="action-area"><button class="more-btn" onclick="showMore('allianz')">🔍 檢視更多細節</button></div>
+        </div>
+    </div>
+
+    <div class="card chubb" data-title="安達人壽 富貴大贏家 40% 4.00">
+        <div class="card-header" onclick="toggleCard(this)">
+            <div class="company-info"><span class="name" style="color: var(--chubb-orange);">安達人壽</span><span class="product">富貴大贏家變額萬能壽險</span></div>
+            <div class="badges"><span class="badge badge-main">最高借款 40%</span><span class="badge">利率 4.00%</span></div>
+        </div>
+        <div class="card-content">
+            <div class="info-grid">
+                <div class="info-box"><h4>資金到帳時效</h4><p class="hl-time">約 3-5 工作日</p></div>
+                <div class="info-box"><h4>標的轉換價格適用</h4><p>轉出：T+1 評價日<br>轉入：T+2 評價日</p></div>
+                <div class="info-box"><h4>借款申請路徑</h4><p>保戶專區線上辦理 或 檢附身分證郵寄</p></div>
+                <div class="info-box"><h4>還款帳號查詢</h4><p>官網「保戶專區」> 借款資訊 > 查看「14 碼繳款專用帳號」
+</p></div>
+            </div>
+            <div class="action-area"><button class="more-btn" onclick="showMore('chubb')">🔍 檢視更多細節</button></div>
+        </div>
+    </div>
+
+    <div class="card yuanta" data-title="元大人壽 元元豐收 60% 3.95">
+        <div class="card-header" onclick="toggleCard(this)">
+            <div class="company-info"><span class="name" style="color: var(--yuanta-gold);">元大人壽</span><span class="product">元元豐收變額萬能壽險</span></div>
+            <div class="badges"><span class="badge badge-main">最高借款 60%</span><span class="badge">利率 3.95%</span></div>
+        </div>
+        <div class="card-content">
+            <div class="info-grid">
+                <div class="info-box"><h4>資金到帳時效</h4><p class="hl-time">當日完成申請，次一工作日入帳</p></div>
+                <div class="info-box"><h4>標的轉換價格適用</h4><p>轉出：T+1 評價日<br>轉入：T+2 評價日</p></div>
+                <div class="info-box"><h4>借款申請路徑</h4><p>元大 e 櫃檯 APP 申請、臨櫃或郵寄</p></div>
+                <div class="info-box"><h4>還款帳號查詢</h4><p>元大 e 櫃檯 > 借款還款 > 查詢專屬帳號 (銀行代碼 806)</p></div>
+            </div>
+            <div class="action-area"><button class="more-btn" onclick="showMore('yuanta')">🔍 檢視更多細節</button></div>
+        </div>
+    </div>
+
+    <div class="card kgi" data-title="凱基人壽 一生傳富 60% 3.85">
+        <div class="card-header" onclick="toggleCard(this)">
+            <div class="company-info"><span class="name" style="color: var(--kgi-orange);">凱基人壽</span><span class="product">一生傳富變額壽險</span></div>
+            <div class="badges"><span class="badge badge-main">最高借款 60%</span><span class="badge">利率 3.85%</span></div>
+        </div>
+        <div class="card-content">
+            <div class="info-grid">
+                <div class="info-box"><h4>資金到帳時效</h4><p class="hl-time">約 2-3 工作日</p></div>
+                <div class="info-box"><h4>標的轉換價格適用</h4><p>轉出：T 當日評價日<br>轉入：T+1 評價日</p></div>
+                <div class="info-box"><h4>借款申請路徑</h4><p>凱基人壽 e 服務 APP 辦理</p></div>
+                <div class="info-box"><h4>還款帳號查詢</h4><p>APP 進入「保單借款查詢」> 顯示「專屬還款帳號」</p></div>
+            </div>
+            <div class="action-area"><button class="more-btn" onclick="showMore('kgi')">🔍 檢視更多細節</button></div>
+        </div>
+    </div>
+
+    <div class="card bnp" data-title="法國巴黎人壽 金采年華 40% 3.50">
+        <div class="card-header" onclick="toggleCard(this)">
+            <div class="company-info"><span class="name" style="color: var(--bnp-green);">法國巴黎人壽</span><span class="product">金采年華變額萬能壽險</span></div>
+            <div class="badges"><span class="badge badge-main">最高借款 40%</span><span class="badge">利率 3.50%</span></div>
+        </div>
+        <div class="card-content">
+            <div class="info-grid">
+                <div class="info-box"><h4>資金到帳時效</h4><p class="hl-time">約 5-7 工作日</p></div>
+                <div class="info-box"><h4>標的轉換價格適用</h4><p>轉出：T+1 評價日<br>轉入：贖回入帳後次一評價日</p></div>
+                <div class="info-box"><h4>借款申請路徑</h4><p>主要以紙本郵寄申請為主</p></div>
+                <div class="info-box"><h4>還款帳號查詢</h4><p>登入法巴官網「e 服務」> 借還款資訊 > 查看銀行虛擬帳號</p></div>
+            </div>
+            <div class="action-area"><button class="more-btn" onclick="showMore('bnp')">🔍 檢視更多細節</button></div>
+        </div>
+    </div>
+
+    <div class="footer">
+        <p>※ 本工具僅供業務同仁內部交流使用，非屬招攬文件</p>
+        <p>版權所有 © 2026 保險商品整理</p>
+    </div>
+</div>
+
+<div id="moreInfoModal" class="modal">
+    <div class="modal-content">
+        <div class="modal-header"><h2 id="modalTitle">詳細資訊</h2><span class="close" onclick="closeModal()">&times;</span></div>
+        <div class="modal-body" id="modalBody"></div>
+	<div class="timing-box">
+            <strong>🕒 借款時機：</strong><span id="modalTiming"></span>
+        </div>
+        <div id="timelineSection" class="timeline-container">
+            <span class="timeline-title">📍 標的轉換時序 (T=申請日之最近工作日)</span>
+            <div class="timeline" id="timelineUI"></div>
+        </div>
+    </div>
+</div>
+
+<script>
+    const extraDetails = {
+        allianz: { 
+            color: "#003781", title: "安聯人壽", deadline: "15:00",
+            days: "轉出 T+1, 轉入國內 T+2 / 海外依贖回天數", 
+            threshold: "帳戶價值 90%", alert: "帳戶價值 80%", limit: "單日線上上限 100 萬",
+		timing: "保單簽收後可借",
+            t_out: 1, t_in: 3, steps: ["受理申請", "轉出評價(國內)", "轉入完成(國內)", "轉入完成(海外)"] 
+        },
+        chubb: { 
+            color: "#ff9d00", title: "安達人壽", deadline: "11:00",
+            days: "轉出 T+1, 轉入 T+2", 
+            threshold: "帳戶價值 90%", alert: "帳戶價值 80%", limit: "單筆上限 100 萬 / 總額 200 萬",
+		timing: "保單簽收後可借",
+            t_out: 1, t_in: 2, steps: ["受理申請", "轉出評價日", "轉入評價日", "作業完成"]
+        },
+        yuanta: { 
+            color: "#b2945e", title: "元大人壽", deadline: "15:00",
+            days: "轉出 T+1, 轉入 T+2", 
+            threshold: "帳戶價值 90%", alert: "帳戶價值 80%", limit: "單日線上上限 50 萬",
+		timing: "保單簽收後可借",
+            t_out: 1, t_in: 2, steps: ["受理申請", "轉出評價日", "轉入評價日", " "]
+        },
+        kgi: { 
+            color: "#f37021", title: "凱基人壽", deadline: "17:00",
+            days: "轉出 T 當日, 轉入 T+1", 
+            threshold: "帳戶價值 90%", alert: "帳戶價值 80%", limit: "單日線上上限 100 萬",
+		timing: "契撤後十日；紙本簽收可以簽完就可以借",
+            t_out: 0, t_in: 1, steps: ["受理/轉出", "轉入評價日", "作業完成", " "]
+        },
+        bnp: { 
+            color: "#00965e", title: "法國巴黎人壽", deadline: "17:30",
+            days: "轉出 T+1, 轉入視基金贖回款入帳日", 
+            threshold: "帳戶價值 90%", alert: "帳戶價值 80%", limit: "單日線上上限 50 萬",
+		timing: "契撤期後十日後可申請",
+            t_out: 1, t_in: 2, steps: ["受理申請", "轉出評價日", "轉入完成", " "]
+        }
+    };
+
+    function generateTimeline(id) {
+        const data = extraDetails[id];
+        document.documentElement.style.setProperty('--current-color', data.color);
+        
+        let html = `
+            <div class="step finish">
+                <div class="dot">T</div>
+                <div class="step-label">申請日</div>
+                <div class="step-desc">${data.steps[0]}<br><span class="deadline-tag">${data.deadline} 截單</span></div>
+            </div>`;
+        
+        for(let i=1; i<=3; i++) {
+            let desc = data.steps[i] || "";
+            if (desc.trim() === "") continue;
+
+            let status = "";
+            if(i === data.t_out) status = "active";
+            if(i === data.t_in) status = "finish";
+            
+            html += `
+                <div class="step ${status}">
+                    <div class="dot">T+${i}</div>
+                    <div class="step-label">評價日</div>
+                    <div class="step-desc">${desc}</div>
+                </div>`;
+        }
+        document.getElementById('timelineUI').innerHTML = html;
+    }
+
+    function toggleCard(header) {
+        const card = header.parentElement;
+        const isActive = card.classList.contains('active');
+        document.querySelectorAll('.card').forEach(c => c.classList.remove('active'));
+        if (!isActive) {
+            card.classList.add('active');
+            setTimeout(() => { card.scrollIntoView({ behavior: 'smooth', block: 'nearest' }); }, 300);
+        }
+    }
+
+    function showMore(id) {
+        const data = extraDetails[id];
+        document.getElementById('modalTitle').innerText = data.title + "｜進階資訊";
+	document.getElementById('modalTiming').innerText = data.timing;
+        document.getElementById('modalBody').innerHTML = `
+            <p><span class="modal-label">標的轉換實際天數：</span><span class="modal-value">${data.days}</span></p>
+            <p><span class="modal-label">強制扣抵門檻：</span><span class="modal-value">${data.threshold}</span></p>
+            <p><span class="modal-label">預警通知門檻：</span><span class="modal-value">${data.alert}</span></p>
+            <p><span class="modal-label">單日線上可借款上限：</span><span class="modal-value">${data.limit}</span></p>
+        `;
+        generateTimeline(id);
+        document.getElementById('moreInfoModal').style.display = "flex";
+    }
+
+    function closeModal() { document.getElementById('moreInfoModal').style.display = "none"; }
+    window.onclick = function(event) { if (event.target == document.getElementById('moreInfoModal')) closeModal(); }
+
+    function filterCards() {
+        let input = document.getElementById('searchInput').value.toLowerCase();
+        document.querySelectorAll('.card').forEach(card => {
+            let title = card.getAttribute('data-title').toLowerCase();
+            card.style.display = title.includes(input) ? "" : "none";
+        });
+    }
+</script>
+</body>
+</html>
